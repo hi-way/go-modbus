@@ -35,5 +35,4 @@ func TestBitShift(t *testing.T) {
 		}
 	}
 	t.Logf("bit %s", hex.EncodeToString(bi))
-
 }

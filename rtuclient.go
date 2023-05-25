@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"go.bug.st/serial"
 )
 
 const (
@@ -97,6 +98,13 @@ func NewRtuPackager(slaveID byte) (p Packager) {
 func NewSerialTransporter(portName string) (t Transporter) {
 	t = &serialPortTransporter{
 		portName: portName,
+	}
+	return
+}
+func NewSerialTransporterMode(portName string, mode serial.Mode) (t Transporter) {
+	t = &serialPortTransporter{
+		portName: portName,
+		Mode:     mode,
 	}
 	return
 }

@@ -25,9 +25,15 @@ Bit 操作:
 - TCP
 - Serial (RTU, ASCII)
 
-# 插件说用
+# 使用插件
 
 - go.bug.st/serial v1.5.0
+
+# 测试使用工具
+
+- Modbus Poll
+- Modbus Slave
+- HHD Virtual Serial Port Tools
 
 # 使用说明
 
@@ -40,9 +46,12 @@ client := modbus.TCPClient("localhost:502")
 results, err := client.ReadInputRegisters(8, 1)
 
 // Modbus RTU/ASCII
-// Default configuration is 19200, 8, 1, even
-client = modbus.RTUClient("/dev/ttyS0")
-results, err = client.ReadCoils(2, 1)
+// Default configuration is 9600, 8, 1, even
+st := NewSerialTransporter("COM3")
+pk := modbus.NewRtuPackager(1)
+defer st.Close()
+client := modbus.NewClient(pk,st)
+results, err := client.ReadHoldingRegisters(1, 2)
 ```
 
 Advanced usage:
@@ -65,18 +74,12 @@ results, err = client.WriteMultipleCoils(5, 10, []byte{4, 3})
 
 ```go
 // Modbus RTU/ASCII
-handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
-handler.BaudRate = 115200
-handler.DataBits = 8
-handler.Parity = "N"
-handler.StopBits = 1
-handler.SlaveID = 1
-handler.Timeout = 5 * time.Second
-
-err := handler.Connect()
-defer handler.Close()
-
-client := modbus.NewClient(handler)
-results, err := client.ReadDiscreteInputs(15, 2)
+st := NewSerialTransporterMode("COM3",serial.Mode{
+BaudRate: 9600,
+})
+pk := modbus.NewRtuPackager(1)
+defer st.Close()
+client := modbus.NewClient(pk,st)
+results, err := client.ReadHoldingRegisters(1, 2)
 ```
 
