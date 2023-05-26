@@ -11,7 +11,7 @@ const (
 	tcpProtocolIdentifier uint16 = 0x0000
 	// Modbus Application Protocol
 	tcpHeaderSize = 7
-	tcpMaxSize    = 256
+	tcpMaxSize    = 259
 )
 
 // tcpPackager  tcp包解析器
@@ -67,22 +67,36 @@ func (p *tcpPackager) Decode(results []byte) (adu ApplicationDataUnit, err error
 		return
 	}
 	// Read length value in the header
-	length := binary.BigEndian.Uint16(results[4:])
-	pduLength := allLength - tcpHeaderSize + 1
-	if pduLength <= 0 || pduLength != int(length) {
-		err = fmt.Errorf("modbus: length in response '%v' does not match pdu data length '%v'", length-1, pduLength)
+	length := int(binary.BigEndian.Uint16(results[4:6]))
+	slaveID := results[tcpHeaderSize-1]
+	if length+6 != allLength {
+		err = fmt.Errorf("modbus: length in response '%v' does not match pdu data length '%v'", allLength, length)
 		return
 	}
 	functionCode := results[tcpHeaderSize]
-	pduData := results[tcpHeaderSize+1:]
-	slaveID := results[tcpHeaderSize-1]
-	pdu := protocolDataUnit{
-		functionCode: functionCode,
-		data:         pduData,
-		length:       pduLength,
+	pduLength := length
+	var pdu protocolDataUnit
+	switch functionCode {
+	//read
+	case FuncCodeReadDiscreteInputs, FuncCodeReadCoils, FuncCodeReadInputRegisters, FuncCodeReadHoldingRegisters:
+		pduLength = int(results[8])
+		pduData := results[tcpHeaderSize+2:]
+		pdu = protocolDataUnit{
+			functionCode: functionCode,
+			data:         pduData,
+			length:       pduLength,
+		}
+	default:
+		pduData := results[tcpHeaderSize+1:]
+		pdu = protocolDataUnit{
+			functionCode: functionCode,
+			data:         pduData,
+			length:       len(pduData),
+		}
 	}
 	adu = applicationDataUnit{
 		slaveID:      slaveID,
+		length:       length,
 		pdu:          pdu,
 		checkSumByte: []byte{0},
 		checkSum:     0,

@@ -15,12 +15,14 @@ func TestTcpReadCoils(t *testing.T) {
 	c := NewClient(pk, st)
 	request, results, err := c.ReadCoils(0, 10)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 func TestTcpWriteSingleCoil(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
@@ -29,12 +31,14 @@ func TestTcpWriteSingleCoil(t *testing.T) {
 	c := NewClient(pk, st)
 	request, results, err := c.WriteSingleCoil(0, true)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 func TestTcpWriteMultipleCoils(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
@@ -44,12 +48,14 @@ func TestTcpWriteMultipleCoils(t *testing.T) {
 	coils := []bool{false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true}
 	request, results, err := c.WriteMultipleCoils(0, uint16(len(coils)), coils)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 func TestTcpReadDiscreteInputs(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
@@ -58,12 +64,14 @@ func TestTcpReadDiscreteInputs(t *testing.T) {
 	c := NewClient(pk, st)
 	request, results, err := c.ReadDiscreteInputs(0, 10)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 func TestTcpReadInputRegisters(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
@@ -72,12 +80,14 @@ func TestTcpReadInputRegisters(t *testing.T) {
 	c := NewClient(pk, st)
 	request, results, err := c.ReadInputRegisters(0, 10)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 func TestTcpReadHoldingRegisters(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
@@ -85,14 +95,16 @@ func TestTcpReadHoldingRegisters(t *testing.T) {
 	defer func() { _ = st.Close() }()
 	pk := NewTcpPackager(1)
 	c := NewClient(pk, st)
-	request, results, err := c.ReadHoldingRegisters(0, 10)
+	request, results, err := c.ReadHoldingRegisters(0, 125)
 	if err != nil {
-		t.Log("Write", hex.EncodeToString(request.GetData()))
+		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("Write", hex.EncodeToString(request.GetData()))
-	t.Log(hex.EncodeToString(results.GetData()))
+	t.Log("request", hex.EncodeToString(request.GetData()))
+	t.Log("results", hex.EncodeToString(results.GetData()))
+	t.Logf("results length %d ", results.GetPDU().Length())
+	t.Logf("results data %s", hex.EncodeToString(results.GetPDU().GetData()))
 }
 
 func TestTransactionID(t *testing.T) {

@@ -63,8 +63,7 @@ func (pdu protocolDataUnit) ToHex() (h string) {
 type ApplicationDataUnit interface {
 	GetSlaveId() (slaveID byte)
 	GetFunctionCode() (f byte)
-	PDULength() (l int)
-	GetPDU() (data []byte)
+	GetPDU() (data ProtocolDataUnit)
 	ToHex() (h string)
 	GetData() (data []byte)
 	Length() (l int)
@@ -76,6 +75,7 @@ type applicationDataUnit struct {
 	slaveID      byte
 	pdu          ProtocolDataUnit
 	data         []byte
+	length       int
 	checkSum     uint16
 	checkSumByte []byte
 }
@@ -86,16 +86,13 @@ func (u applicationDataUnit) GetSlaveId() (slaveID byte) {
 func (u applicationDataUnit) GetFunctionCode() (f byte) {
 	return u.pdu.GetFunctionCode()
 }
-func (u applicationDataUnit) GetPDU() (data []byte) {
-	return u.pdu.GetData()
+func (u applicationDataUnit) GetPDU() (data ProtocolDataUnit) {
+	return u.pdu
 }
 func (u applicationDataUnit) Length() (l int) {
-	return len(u.data)
+	return u.length
 }
 
-func (u applicationDataUnit) PDULength() (l int) {
-	return u.pdu.Length()
-}
 func (u applicationDataUnit) ToHex() (h string) {
 	return hex.EncodeToString(u.data)
 }
