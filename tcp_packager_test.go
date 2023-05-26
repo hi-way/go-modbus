@@ -13,7 +13,7 @@ func TestTcpReadCoils(t *testing.T) {
 	defer func() { _ = st.Close() }()
 	pk := NewTcpPackager(1)
 	c := NewClient(pk, st)
-	request, results, err := c.ReadCoils(0, 10)
+	request, results, err := c.ReadCoils(0, 2000)
 	if err != nil {
 		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
@@ -62,7 +62,7 @@ func TestTcpReadDiscreteInputs(t *testing.T) {
 	defer func() { _ = st.Close() }()
 	pk := NewTcpPackager(1)
 	c := NewClient(pk, st)
-	request, results, err := c.ReadDiscreteInputs(0, 10)
+	request, results, err := c.ReadDiscreteInputs(0, 2000)
 	if err != nil {
 		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
@@ -78,7 +78,7 @@ func TestTcpReadInputRegisters(t *testing.T) {
 	defer func() { _ = st.Close() }()
 	pk := NewTcpPackager(1)
 	c := NewClient(pk, st)
-	request, results, err := c.ReadInputRegisters(0, 10)
+	request, results, err := c.ReadInputRegisters(0, 125)
 	if err != nil {
 		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
