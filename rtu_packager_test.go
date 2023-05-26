@@ -2,6 +2,7 @@ package modbus
 
 import (
 	"encoding/hex"
+	"go.bug.st/serial"
 	"testing"
 )
 
@@ -78,6 +79,7 @@ func TestRtuReadInputRegisters(t *testing.T) {
 }
 func TestRtuReadHoldingRegisters(t *testing.T) {
 	st := NewSerialTransporter("COM3")
+	st.Mode = serial.Mode{BaudRate: defaultBaudRate}
 	defer func() { _ = st.Close() }()
 	pk := NewRtuPackager(1)
 	c := NewClient(pk, st)

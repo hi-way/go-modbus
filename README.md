@@ -6,7 +6,7 @@
 
 Bit 操作:
 
-- 功能码：1 读线圈 
+- 功能码：1 读线圈
 - 功能码：2 读离散量输入
 - 功能码：5 写单个线圈
 - 功能码：15 写多个线圈
@@ -19,11 +19,12 @@ Bit 操作:
 - 功能码：16 写多个寄存器
 - 功能码：23 读/写多个寄存器
 
-
 # 支持格式
 
 - TCP
-- Serial (RTU, ASCII)
+- RTU
+- ASCII
+- RTU_OVER_TCP
 
 # 使用插件
 
@@ -36,49 +37,41 @@ Bit 操作:
 - HHD Virtual Serial Port Tools
 
 # 使用说明
-
-Basic usage:
-
+- TCP
 ```go
-// Modbus TCP
-client := modbus.TCPClient("localhost:502")
-// Read input register 9
-results, err := client.ReadInputRegisters(8, 1)
-
-// Modbus RTU/ASCII
-// Default configuration is 9600, 8, 1, even
-st := NewSerialTransporter("COM3")
-pk := modbus.NewRtuPackager(1)
-defer st.Close()
-client := modbus.NewClient(pk,st)
-results, err := client.ReadHoldingRegisters(1, 2)
+st := NewTcpTransporter("127.0.0.1:502")
+st.TimeOut=1*time.Second
+pk := NewTcpPackager(1)
+defer func() { _ = st.Close() }()
+pk := NewTcpPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
 ```
-
-Advanced usage:
-
+- RTU
 ```go
-// Modbus TCP
-handler := modbus.NewTCPClientHandler("localhost:502")
-handler.Timeout = 10 * time.Second
-handler.SlaveID = 0xFF
-handler.Logger = log.New(os.Stdout, "test: ", log.LstdFlags)
-// Connect manually so that multiple requests are handled in one connection session
-err := handler.Connect()
-defer handler.Close()
-
-client := modbus.NewClient(handler)
-results, err := client.ReadDiscreteInputs(15, 2)
-results, err = client.WriteMultipleRegisters(1, 2, []byte{0, 3, 0, 4})
-results, err = client.WriteMultipleCoils(5, 10, []byte{4, 3})
-```
-
-```go
-// Modbus RTU/ASCII
 st := NewSerialTransporter("COM3")
 st.Mode=serial.Mode{BaudRate: defaultBaudRate}
-pk := modbus.NewRtuPackager(1)
-defer st.Close()
-client := modbus.NewClient(pk,st)
-results, err := client.ReadHoldingRegisters(1, 2)
+defer func() { _ = st.Close() }()
+pk := NewRtuPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
+```
+- ASCII
+```go
+st := NewSerialTransporter("COM3")
+st.Mode=serial.Mode{BaudRate: defaultBaudRate}
+defer func() { _ = st.Close() }()
+pk := NewAsciiPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
+```
+- RTU_OVER_TCP
+```go
+st := NewTcpTransporter("127.0.0.1:502")
+st.TimeOut=1*time.Second
+defer func() { _ = st.Close() }()
+pk := NewRtuPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(0, 10)
 ```
 

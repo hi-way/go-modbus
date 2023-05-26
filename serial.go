@@ -55,7 +55,13 @@ func (t *SerialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduRespons
 		return nil, err
 	}
 	time.Sleep(t.calculateDelay(aduRequest))
-	buf := make([]byte, rtuMaxSize)
+	bl := len(aduRequest.GetCheckSumByte())
+	max := rtuMaxSize
+	// ascii 长度翻倍
+	if bl == 1 {
+		max = rtuMaxSize * 2
+	}
+	buf := make([]byte, max)
 	n, err := t.port.Read(buf)
 	if err != nil {
 		return nil, err

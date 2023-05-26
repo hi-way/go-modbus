@@ -22,7 +22,7 @@ func (p *rtuPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err
 		err = fmt.Errorf("modbus: length of data '%v' must not be bigger than '%v'", length, rtuMaxSize)
 		return
 	}
-	buf := bytes.NewBuffer(make([]byte, length))
+	buf := bytes.NewBuffer([]byte{})
 	buf.WriteByte(p.slaveID)
 	buf.WriteByte(pdu.GetFunctionCode())
 	buf.Write(pdu.GetData())
