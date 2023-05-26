@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"go.bug.st/serial"
 )
 
 const (
@@ -17,21 +16,21 @@ type rtuPackager struct {
 	slaveID byte
 }
 
-func (r *rtuPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err error) {
-	length := len(pdu.GetData()) + 4
+func (p *rtuPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err error) {
+	length := len(pdu.GetData()) + rtuMinSize
 	if length > rtuMaxSize {
 		err = fmt.Errorf("modbus: length of data '%v' must not be bigger than '%v'", length, rtuMaxSize)
 		return
 	}
-	buf := bytes.NewBuffer([]byte{})
-	buf.WriteByte(r.slaveID)
+	buf := bytes.NewBuffer(make([]byte, length))
+	buf.WriteByte(p.slaveID)
 	buf.WriteByte(pdu.GetFunctionCode())
 	buf.Write(pdu.GetData())
 	checksum := CRC16(buf.Bytes())
 	checksumByte := CRC16ToBytes(checksum)
 	buf.Write(checksumByte)
 	adu = applicationDataUnit{
-		slaveID:      r.slaveID,
+		slaveID:      p.slaveID,
 		pdu:          pdu,
 		checkSum:     checksum,
 		checkSumByte: checksumByte,
@@ -39,7 +38,7 @@ func (r *rtuPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err
 	}
 	return
 }
-func (r *rtuPackager) Decode(results []byte) (adu ApplicationDataUnit, err error) {
+func (p *rtuPackager) Decode(results []byte) (adu ApplicationDataUnit, err error) {
 	length := len(results)
 	if length > rtuMaxSize {
 		err = fmt.Errorf("modbus: response data size '%v' exceeds the maximum limit of '%v'", length, rtuMaxSize)
@@ -68,12 +67,16 @@ func (r *rtuPackager) Decode(results []byte) (adu ApplicationDataUnit, err error
 	}
 	return
 }
-func (r *rtuPackager) Verify(aduRequest ApplicationDataUnit, aduResponse ApplicationDataUnit) (err error) {
+func (p *rtuPackager) Verify(aduRequest ApplicationDataUnit, aduResponse ApplicationDataUnit) (err error) {
 	if aduRequest.GetSlaveId() != aduResponse.GetSlaveId() {
 		err = fmt.Errorf("modbus: aduRequest  slaveId '%v' and aduResponse slaveId '%v' are inconsistent", aduRequest.GetSlaveId(), aduResponse.GetSlaveId())
 		return
 	}
 	if aduRequest.GetFunctionCode() != aduResponse.GetFunctionCode() {
+		if aduResponse.GetFunctionCode() == aduRequest.GetFunctionCode()+0x80 {
+			err = fmt.Errorf("modbus: error   errorCode '%v'", aduResponse.GetFunctionCode())
+			return
+		}
 		err = fmt.Errorf("modbus: aduRequest  functionCode '%v' and aduResponse functionCode '%v' are inconsistent", aduRequest.GetFunctionCode(), aduResponse.GetFunctionCode())
 		return
 	}
@@ -92,19 +95,5 @@ func (r *rtuPackager) Verify(aduRequest ApplicationDataUnit, aduResponse Applica
 
 func NewRtuPackager(slaveID byte) (p Packager) {
 	p = &rtuPackager{slaveID: slaveID}
-	return
-}
-
-func NewSerialTransporter(portName string) (t Transporter) {
-	t = &serialPortTransporter{
-		portName: portName,
-	}
-	return
-}
-func NewSerialTransporterMode(portName string, mode serial.Mode) (t Transporter) {
-	t = &serialPortTransporter{
-		portName: portName,
-		Mode:     mode,
-	}
 	return
 }

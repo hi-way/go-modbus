@@ -108,7 +108,6 @@ func (c *client) WriteSingleCoil(address uint16, value bool) (request Applicatio
 	var coil uint16 = 0x0000
 	if value {
 		coil = 0xFF00
-		return
 	}
 	data := dataBlock(address, coil)
 	pdu := protocolDataUnit{

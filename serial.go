@@ -15,30 +15,30 @@ const (
 	serialByteLen int64 = 1 + 8 + 1 + 1
 )
 
-type serialPortTransporter struct {
-	portName string
+type SerialPortTransporter struct {
+	PortName string
 	serial.Mode
 	port serial.Port
 	mu   sync.Mutex
 }
 
-func (t *serialPortTransporter) Open() error {
+func (t *SerialPortTransporter) Open() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	return t.open()
 }
-func (t *serialPortTransporter) open() error {
-	port, err := serial.Open(t.portName, &t.Mode)
+func (t *SerialPortTransporter) open() error {
+	port, err := serial.Open(t.PortName, &t.Mode)
 	if err == nil {
 		_ = port.SetReadTimeout(time.Second)
 		t.port = port
 	}
 	return err
 }
-func (t *serialPortTransporter) Connected() bool {
+func (t *SerialPortTransporter) Connected() bool {
 	return t.port != nil
 }
-func (t *serialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduResponse []byte, err error) {
+func (t *SerialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduResponse []byte, err error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if !t.Connected() {
@@ -47,7 +47,7 @@ func (t *serialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduRespons
 			return nil, err
 		}
 		if !t.Connected() {
-			return nil, fmt.Errorf("serial could not open %s", t.portName)
+			return nil, fmt.Errorf("serial could not open %s", t.PortName)
 		}
 	}
 	_, err = t.port.Write(aduRequest.GetData())
@@ -63,13 +63,13 @@ func (t *serialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduRespons
 	data := buf[:n]
 	return data, nil
 }
-func (t *serialPortTransporter) Close() error {
+func (t *SerialPortTransporter) Close() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	return t.close()
 }
 
-func (t *serialPortTransporter) close() error {
+func (t *SerialPortTransporter) close() error {
 	if !t.Connected() {
 		return nil
 	}
@@ -78,7 +78,7 @@ func (t *serialPortTransporter) close() error {
 	return err
 }
 
-func (t *serialPortTransporter) calculateDelay(aduRequest ApplicationDataUnit) time.Duration {
+func (t *SerialPortTransporter) calculateDelay(aduRequest ApplicationDataUnit) time.Duration {
 	baudRate := t.BaudRate
 	if baudRate == 0 {
 		baudRate = defaultBaudRate
@@ -106,4 +106,11 @@ func (t *serialPortTransporter) calculateDelay(aduRequest ApplicationDataUnit) t
 	}
 	byteDelay := bitDelay * serialByteLen
 	return time.Duration(rtuMinByteLen*byteDelay + int64(length)*byteDelay)
+}
+
+func NewSerialTransporter(portName string) (t *SerialPortTransporter) {
+	t = &SerialPortTransporter{
+		PortName: portName,
+	}
+	return
 }

@@ -74,9 +74,8 @@ results, err = client.WriteMultipleCoils(5, 10, []byte{4, 3})
 
 ```go
 // Modbus RTU/ASCII
-st := NewSerialTransporterMode("COM3",serial.Mode{
-BaudRate: 9600,
-})
+st := NewSerialTransporter("COM3")
+st.Mode=serial.Mode{BaudRate: defaultBaudRate}
 pk := modbus.NewRtuPackager(1)
 defer st.Close()
 client := modbus.NewClient(pk,st)
