@@ -37,6 +37,8 @@ func (p *asciiPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, e
 		checkSum:     uint16(checkSum),
 		checkSumByte: checkSumByte,
 		data:         buf.Bytes(),
+		length:       buf.Len(),
+		mode:         ASCII,
 	}
 	return
 }
@@ -86,6 +88,8 @@ func (p *asciiPackager) Decode(results []byte) (adu ApplicationDataUnit, err err
 		checkSumByte: checkSum,
 		checkSum:     uint16(checkSum[0]),
 		data:         results,
+		length:       length,
+		mode:         ASCII,
 	}
 	return
 }

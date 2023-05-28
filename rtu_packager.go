@@ -35,6 +35,8 @@ func (p *rtuPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err
 		checkSum:     checksum,
 		checkSumByte: checksumByte,
 		data:         buf.Bytes(),
+		length:       buf.Len(),
+		mode:         RTU,
 	}
 	return
 }
@@ -50,12 +52,25 @@ func (p *rtuPackager) Decode(results []byte) (adu ApplicationDataUnit, err error
 	}
 	slaveID := results[0]
 	functionCode := results[1]
-	pduData := results[1 : length-2]
-	pduLength := results[2]
-	pdu := protocolDataUnit{
-		functionCode: functionCode,
-		data:         pduData,
-		length:       int(pduLength),
+	var pduLength int
+	var pdu protocolDataUnit
+	switch functionCode {
+	//read
+	case FuncCodeReadDiscreteInputs, FuncCodeReadCoils, FuncCodeReadInputRegisters, FuncCodeReadHoldingRegisters:
+		pduLength = int(results[2])
+		pduData := results[3 : length-2]
+		pdu = protocolDataUnit{
+			functionCode: functionCode,
+			data:         pduData,
+			length:       pduLength,
+		}
+	default:
+		pduData := results[2 : length-2]
+		pdu = protocolDataUnit{
+			functionCode: functionCode,
+			data:         pduData,
+			length:       len(pduData),
+		}
 	}
 	checkSumByte := results[length-2:]
 	adu = applicationDataUnit{
@@ -64,6 +79,8 @@ func (p *rtuPackager) Decode(results []byte) (adu ApplicationDataUnit, err error
 		checkSumByte: checkSumByte,
 		checkSum:     CRC16ToUint(checkSumByte),
 		data:         results,
+		mode:         RTU,
+		length:       length,
 	}
 	return
 }

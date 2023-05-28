@@ -1,6 +1,7 @@
 package modbus
 
 import (
+	"bytes"
 	"fmt"
 	"go.bug.st/serial"
 	"sync"
@@ -44,24 +45,42 @@ func (t *SerialPortTransporter) Send(aduRequest ApplicationDataUnit) (aduRespons
 	if !t.Connected() {
 		err = t.open()
 		if err != nil {
-			return nil, err
+			return
 		}
 		if !t.Connected() {
-			return nil, fmt.Errorf("serial could not open %s", t.PortName)
+			err = fmt.Errorf("serial could not open %s", t.PortName)
+			return
 		}
+	}
+	err = t.port.ResetInputBuffer()
+	if err != nil {
+		return
 	}
 	_, err = t.port.Write(aduRequest.GetData())
 	if err != nil {
-		return nil, err
+		return
 	}
-	time.Sleep(t.calculateDelay(aduRequest))
-	buf := make([]byte, rtuMaxSize*2)
-	n, err := t.port.Read(buf)
-	if err != nil {
-		return nil, err
+	sleep := t.calculateDelay(aduRequest)
+	time.Sleep(sleep)
+	var n int
+	buf := bytes.NewBuffer([]byte{})
+	for true {
+		temp := make([]byte, rtuMaxSize*2)
+		n, err = t.port.Read(temp)
+		if err != nil {
+			return
+		}
+		if n == 0 {
+			break
+		}
+		buf.Write(temp[:n])
+		if buf.Len() > rtuMinSize {
+			break
+		}
+		time.Sleep(sleep)
 	}
-	data := buf[:n]
-	return data, nil
+	aduResponse = buf.Bytes()
+	return
 }
 func (t *SerialPortTransporter) Close() error {
 	t.mu.Lock()

@@ -29,6 +29,14 @@ const (
 	// FuncCodeReadWriteMultipleRegisters 功能码:读/写多个寄存器
 	FuncCodeReadWriteMultipleRegisters = 23
 )
+const (
+	TCP          = ModbusMode("TCP")
+	RTU          = ModbusMode("RTU")
+	ASCII        = ModbusMode("ASCII")
+	RTU_OVER_TCP = ModbusMode("RTU_OVER_TCP")
+)
+
+type ModbusMode string
 
 // ProtocolDataUnit 协议数据单元
 type ProtocolDataUnit interface {
@@ -61,14 +69,15 @@ func (pdu protocolDataUnit) ToHex() (h string) {
 
 // ApplicationDataUnit 应用数据单元
 type ApplicationDataUnit interface {
-	GetSlaveId() (slaveID byte)
-	GetFunctionCode() (f byte)
-	GetPDU() (data ProtocolDataUnit)
-	ToHex() (h string)
-	GetData() (data []byte)
-	Length() (l int)
-	GetCheckSum() (data uint16)
-	GetCheckSumByte() (data []byte)
+	GetSlaveId() byte
+	GetFunctionCode() byte
+	GetPDU() ProtocolDataUnit
+	ToHex() string
+	GetData() []byte
+	Length() int
+	GetCheckSum() uint16
+	GetCheckSumByte() []byte
+	GetMode() ModbusMode
 }
 
 type applicationDataUnit struct {
@@ -78,32 +87,37 @@ type applicationDataUnit struct {
 	length       int
 	checkSum     uint16
 	checkSumByte []byte
+	mode         ModbusMode
 }
 
-func (u applicationDataUnit) GetSlaveId() (slaveID byte) {
-	return slaveID
+func (u applicationDataUnit) GetSlaveId() byte {
+	return u.slaveID
 }
-func (u applicationDataUnit) GetFunctionCode() (f byte) {
+func (u applicationDataUnit) GetFunctionCode() byte {
 	return u.pdu.GetFunctionCode()
 }
-func (u applicationDataUnit) GetPDU() (data ProtocolDataUnit) {
+func (u applicationDataUnit) GetPDU() ProtocolDataUnit {
 	return u.pdu
 }
-func (u applicationDataUnit) Length() (l int) {
+func (u applicationDataUnit) Length() int {
 	return u.length
 }
 
-func (u applicationDataUnit) ToHex() (h string) {
+func (u applicationDataUnit) ToHex() string {
 	return hex.EncodeToString(u.data)
 }
-func (u applicationDataUnit) GetData() (data []byte) {
+func (u applicationDataUnit) GetData() []byte {
 	return u.data
 }
-func (u applicationDataUnit) GetCheckSum() (data uint16) {
+func (u applicationDataUnit) GetCheckSum() uint16 {
 	return u.checkSum
 }
-func (u applicationDataUnit) GetCheckSumByte() (data []byte) {
+func (u applicationDataUnit) GetCheckSumByte() []byte {
 	return u.checkSumByte
+}
+
+func (u applicationDataUnit) GetMode() ModbusMode {
+	return u.mode
 }
 
 // Packager 包解析器

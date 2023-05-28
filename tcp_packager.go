@@ -53,6 +53,8 @@ func (p *tcpPackager) Encode(pdu protocolDataUnit) (adu ApplicationDataUnit, err
 		checkSum:     0,
 		checkSumByte: []byte{0},
 		data:         bs.Bytes(),
+		mode:         TCP,
+		length:       bs.Len(),
 	}
 	return
 }
@@ -101,6 +103,7 @@ func (p *tcpPackager) Decode(results []byte) (adu ApplicationDataUnit, err error
 		checkSumByte: []byte{0},
 		checkSum:     0,
 		data:         results,
+		mode:         TCP,
 	}
 	return
 }
