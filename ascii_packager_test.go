@@ -11,7 +11,7 @@ func TestAsciiReadCoils(t *testing.T) {
 	defer func() { _ = st.Close() }()
 	pk := NewAsciiPackager(1)
 	c := NewClient(pk, st)
-	request, results, err := c.ReadCoils(0, 10)
+	request, results, err := c.ReadCoils(0, 5)
 	if err != nil {
 		t.Log("request", hex.EncodeToString(request.GetData()))
 		t.Error(err)
