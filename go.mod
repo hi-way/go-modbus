@@ -1,4 +1,4 @@
-module go-modbus
+module github.com/hi-way/go-modbus
 
 go 1.19
 
