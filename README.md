@@ -1,39 +1,77 @@
-# go-modbus
+# go modbus
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+用go实现modbus协议。
 
-#### 软件架构
-软件架构说明
+# 支持功能码
 
+Bit 操作:
 
-#### 安装教程
+- 功能码：1 读线圈
+- 功能码：2 读离散量输入
+- 功能码：5 写单个线圈
+- 功能码：15 写多个线圈
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+16-bit 操作:
 
-#### 使用说明
+- 功能码：4 读输入寄存器
+- 功能码：3 读保持寄存器
+- 功能码：6 写单个寄存器
+- 功能码：16 写多个寄存器
+- 功能码：23 读/写多个寄存器
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# 支持格式
 
-#### 参与贡献
+- TCP
+- RTU
+- ASCII
+- RTU_OVER_TCP
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+# 使用插件
 
+- go.bug.st/serial v1.5.0
 
-#### 特技
+# 测试使用工具
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+- Modbus Poll
+- Modbus Slave
+- HHD Virtual Serial Port Tools
+
+# 使用说明
+- TCP
+```go
+st := NewTcpTransporter("127.0.0.1:502")
+st.TimeOut=1*time.Second
+pk := NewTcpPackager(1)
+defer func() { _ = st.Close() }()
+pk := NewTcpPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
+```
+- RTU
+```go
+st := NewSerialTransporter("COM3")
+st.Mode=serial.Mode{BaudRate: defaultBaudRate}
+defer func() { _ = st.Close() }()
+pk := NewRtuPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
+```
+- ASCII
+```go
+st := NewSerialTransporter("COM3")
+st.Mode=serial.Mode{BaudRate: defaultBaudRate}
+defer func() { _ = st.Close() }()
+pk := NewAsciiPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(1, 10)
+```
+- RTU_OVER_TCP
+```go
+st := NewTcpTransporter("127.0.0.1:502")
+st.TimeOut=1*time.Second
+defer func() { _ = st.Close() }()
+pk := NewRtuPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(0, 10)
+```
+
