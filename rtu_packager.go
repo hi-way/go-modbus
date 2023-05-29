@@ -91,7 +91,7 @@ func (p *rtuPackager) Verify(aduRequest ApplicationDataUnit, aduResponse Applica
 	}
 	if aduRequest.GetFunctionCode() != aduResponse.GetFunctionCode() {
 		if aduResponse.GetFunctionCode() == aduRequest.GetFunctionCode()+0x80 {
-			err = fmt.Errorf("modbus: error   errorCode '%v'", aduResponse.GetFunctionCode())
+			err = fmt.Errorf("modbus: error   errorCode '%X'", aduResponse.GetFunctionCode())
 			return
 		}
 		err = fmt.Errorf("modbus: aduRequest  functionCode '%v' and aduResponse functionCode '%v' are inconsistent", aduRequest.GetFunctionCode(), aduResponse.GetFunctionCode())

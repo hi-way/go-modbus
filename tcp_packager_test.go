@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"sync"
 	"testing"
-	"time"
 )
 
 // 使用modbus slave 模拟进行测试
@@ -91,7 +90,6 @@ func TestTcpReadInputRegisters(t *testing.T) {
 }
 func TestTcpReadHoldingRegisters(t *testing.T) {
 	st := NewTcpTransporter("127.0.0.1:502")
-	st.TimeOut = 1 * time.Second
 	defer func() { _ = st.Close() }()
 	pk := NewTcpPackager(1)
 	c := NewClient(pk, st)
