@@ -100,7 +100,16 @@ func (p *asciiPackager) Verify(aduRequest ApplicationDataUnit, aduResponse Appli
 	}
 	if aduRequest.GetFunctionCode() != aduResponse.GetFunctionCode() {
 		if aduResponse.GetFunctionCode() == aduRequest.GetFunctionCode()+0x80 {
-			err = fmt.Errorf("modbus: error  errorCode '%X'", aduResponse.GetFunctionCode())
+			err = fmt.Errorf("modbus: error   errorCode '%X'", aduResponse.GetFunctionCode())
+			data := aduResponse.GetPDU().GetData()
+			if len(data) == 0 {
+				return
+			}
+			text, exist := faults[data[0]]
+			if !exist {
+				return
+			}
+			err = fmt.Errorf("modbus: error errorCode: '%X' %s", aduResponse.GetFunctionCode(), text)
 			return
 		}
 		err = fmt.Errorf("modbus: aduRequest  functionCode '%v' and aduResponse functionCode '%v' are inconsistent", aduRequest.GetFunctionCode(), aduResponse.GetFunctionCode())

@@ -8,18 +8,18 @@ import (
 )
 
 const (
-	defaultTcpConnectTimeOut = 1 * time.Second
-	defaultTcpReadTimeOut    = 1 * time.Second
-	defaultTcpWriteTimeOut   = 1 * time.Second
+	defaultTcpConnectTimeout = 1 * time.Second
+	defaultTcpReadTimeout    = 1 * time.Second
+	defaultTcpWriteTimeout   = 1 * time.Second
 	defaultTcpKeepAlive      = 30 * time.Second
 )
 
 type TcpTransporter struct {
 	Address        string
-	ConnectTimeOut time.Duration
+	ConnectTimeout time.Duration
 	KeepAlive      time.Duration
-	ReadTimeOut    time.Duration
-	WriteTimeOut   time.Duration
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
 	mu             sync.Mutex
 	conn           net.Conn
 }
@@ -34,11 +34,11 @@ func (mb *TcpTransporter) Send(aduRequest ApplicationDataUnit) (aduResponse []by
 			return
 		}
 	}
-	tcpWriteTimeOut := defaultTcpWriteTimeOut
-	if mb.WriteTimeOut > 0 {
-		tcpWriteTimeOut = mb.WriteTimeOut
+	tcpWriteTimeout := defaultTcpWriteTimeout
+	if mb.WriteTimeout > 0 {
+		tcpWriteTimeout = mb.WriteTimeout
 	}
-	err = mb.conn.SetWriteDeadline(time.Now().Add(tcpWriteTimeOut))
+	err = mb.conn.SetWriteDeadline(time.Now().Add(tcpWriteTimeout))
 	if err != nil {
 		_ = mb.close()
 		return
@@ -48,11 +48,11 @@ func (mb *TcpTransporter) Send(aduRequest ApplicationDataUnit) (aduResponse []by
 		_ = mb.close()
 		return
 	}
-	tcpReadTimeOut := defaultTcpReadTimeOut
-	if mb.ReadTimeOut > 0 {
-		tcpReadTimeOut = mb.ReadTimeOut
+	tcpReadTimeout := defaultTcpReadTimeout
+	if mb.ReadTimeout > 0 {
+		tcpReadTimeout = mb.ReadTimeout
 	}
-	err = mb.conn.SetReadDeadline(time.Now().Add(tcpReadTimeOut))
+	err = mb.conn.SetReadDeadline(time.Now().Add(tcpReadTimeout))
 	if err != nil {
 		_ = mb.close()
 		return
@@ -82,15 +82,15 @@ func (mb *TcpTransporter) Open() error {
 
 func (mb *TcpTransporter) connect() error {
 	if mb.conn == nil {
-		tcpConnectTimeOut := defaultTcpConnectTimeOut
+		tcpConnectTimeout := defaultTcpConnectTimeout
 		tcpKeepAlive := defaultTcpKeepAlive
-		if mb.ConnectTimeOut > 0 {
-			tcpConnectTimeOut = mb.ConnectTimeOut
+		if mb.ConnectTimeout > 0 {
+			tcpConnectTimeout = mb.ConnectTimeout
 		}
 		if mb.KeepAlive > 0 {
 			tcpKeepAlive = mb.KeepAlive
 		}
-		dialer := net.Dialer{Timeout: tcpConnectTimeOut, KeepAlive: tcpKeepAlive}
+		dialer := net.Dialer{Timeout: tcpConnectTimeout, KeepAlive: tcpKeepAlive}
 		conn, err := dialer.Dial("tcp", mb.Address)
 		if err != nil {
 			return err

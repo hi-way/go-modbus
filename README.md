@@ -25,6 +25,7 @@ Bit 操作:
 - RTU
 - ASCII
 - RTU_OVER_TCP
+- ASCII_OVER_TCP 未验证
 
 # 使用插件
 
@@ -68,9 +69,16 @@ request, results, err := c.ReadHoldingRegisters(1, 10)
 - RTU_OVER_TCP
 ```go
 st := NewTcpTransporter("127.0.0.1:502")
-st.TimeOut=1*time.Second
 defer func() { _ = st.Close() }()
 pk := NewRtuPackager(1)
+c := NewClient(pk, st)
+request, results, err := c.ReadHoldingRegisters(0, 10)
+```
+- ASCII_OVER_TCP
+```go
+st := NewTcpTransporter("127.0.0.1:502")
+defer func() { _ = st.Close() }()
+pk := NewAsciiPackager(1)
 c := NewClient(pk, st)
 request, results, err := c.ReadHoldingRegisters(0, 10)
 ```
