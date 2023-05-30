@@ -35,6 +35,20 @@ const (
 	ASCII = ModbusMode("ASCII")
 )
 
+var (
+	faults = map[byte]string{
+		1:  "01:illegal function code",
+		2:  "02:illegal data address",
+		3:  "03:illegal data value",
+		4:  "04:slave station equipment is faulty",
+		5:  "05:confirm",
+		6:  "06:slave device busy",
+		8:  "08:store parity errors",
+		10: "0A:gateway path is unavailable",
+		11: "0B:gateway target device fails to respond",
+	}
+)
+
 type ModbusMode string
 
 // ProtocolDataUnit 协议数据单元
