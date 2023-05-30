@@ -30,10 +30,9 @@ const (
 	FuncCodeReadWriteMultipleRegisters = 23
 )
 const (
-	TCP          = ModbusMode("TCP")
-	RTU          = ModbusMode("RTU")
-	ASCII        = ModbusMode("ASCII")
-	RTU_OVER_TCP = ModbusMode("RTU_OVER_TCP")
+	TCP   = ModbusMode("TCP")
+	RTU   = ModbusMode("RTU")
+	ASCII = ModbusMode("ASCII")
 )
 
 type ModbusMode string

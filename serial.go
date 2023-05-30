@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	defaultBaudRate = 9600
+	defaultSerialReadTimeOut = time.Second
+	defaultBaudRate          = 9600
 	// 开始3.5字符 地址8位 功能码8位 长度8位 CRC效验16位 结束3.5字符
 	rtuMinByteLen int64 = 1 + 1 + 2
 	// 串口传输一个字节位bit的长度 开始位固定为1 数据位8 奇偶校验位1 停止位1
@@ -19,8 +20,9 @@ const (
 type SerialPortTransporter struct {
 	PortName string
 	serial.Mode
-	port serial.Port
-	mu   sync.Mutex
+	ReadTimeOut time.Duration
+	port        serial.Port
+	mu          sync.Mutex
 }
 
 func (t *SerialPortTransporter) Open() error {
@@ -31,7 +33,11 @@ func (t *SerialPortTransporter) Open() error {
 func (t *SerialPortTransporter) open() error {
 	port, err := serial.Open(t.PortName, &t.Mode)
 	if err == nil {
-		_ = port.SetReadTimeout(time.Second)
+		readTimeOut := defaultSerialReadTimeOut
+		if t.ReadTimeOut > 0 {
+			readTimeOut = t.ReadTimeOut
+		}
+		_ = port.SetReadTimeout(readTimeOut)
 		t.port = port
 	}
 	return err
