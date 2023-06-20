@@ -67,6 +67,7 @@ type Client interface {
 type client struct {
 	packager    Packager
 	transporter Transporter
+	log         LogPrint
 }
 
 func (c *client) ReadCoils(address, quantity uint16) (request ApplicationDataUnit, results ApplicationDataUnit, err error) {
