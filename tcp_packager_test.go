@@ -117,6 +117,5 @@ func TestTransactionID(t *testing.T) {
 			wg.Done()
 		}()
 	}
-
 	wg.Wait()
 }
