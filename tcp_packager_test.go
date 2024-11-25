@@ -115,6 +115,7 @@ func TestTransactionID(t *testing.T) {
 		go func() {
 			t.Logf("tcpPackager TransactionID %d", pk.transaction())
 			wg.Done()
+
 		}()
 	}
 	wg.Wait()
