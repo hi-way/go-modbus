@@ -89,5 +89,6 @@ func TestRtuTcpReadHoldingRegisters(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log("Write", hex.EncodeToString(request.GetData()))
+
 	t.Log(hex.EncodeToString(results.GetData()))
 }
